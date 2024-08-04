@@ -28,6 +28,8 @@
         public static class Buffs
         {
             public const ushort
+
+
                 MPRefresh = 909,
                 MPRefresh2 = 1198,
                 ProfaneEssence = 2320,

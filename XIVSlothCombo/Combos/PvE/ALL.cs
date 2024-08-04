@@ -1,4 +1,8 @@
-﻿using XIVSlothCombo.CustomComboNS;
+﻿using ECommons.GameHelpers;
+using System.Numerics;
+using System.Windows.Forms.VisualStyles;
+using XIVSlothCombo.Combos.PvE.Content;
+using XIVSlothCombo.CustomComboNS;
 using XIVSlothCombo.CustomComboNS.Functions;
 using XIVSlothCombo.Services;
 
@@ -118,7 +122,7 @@ namespace XIVSlothCombo.Combos.PvE
             {
                 if (actionID is Reprisal)
                 {
-                    if (TargetHasEffectAny(Debuffs.Reprisal) && IsOffCooldown(Reprisal))
+                    if (TargetHasEffectAny(Debuffs.Reprisal) && GetDebuffRemainingTime(Debuffs.Reprisal) >= 3.5)
                         return OriginalHook(11);
                 }
 
@@ -139,7 +143,7 @@ namespace XIVSlothCombo.Combos.PvE
                     if (ActionReady(Swiftcast))
                         return Swiftcast;
 
-                    if (actionID == WHM.Raise && IsEnabled(CustomComboPreset.WHM_ThinAirRaise) && ActionReady(WHM.ThinAir) && !HasEffect(WHM.Buffs.ThinAir))
+                    if (actionID == WHM.Raise && ActionReady(WHM.ThinAir) && !HasEffect(WHM.Buffs.ThinAir))
                         return WHM.ThinAir;
 
                     return actionID;
@@ -158,8 +162,8 @@ namespace XIVSlothCombo.Combos.PvE
             {
                 if (actionID is Addle)
                 {
-                    if (TargetHasEffectAny(Debuffs.Addle) && IsOffCooldown(Addle))
-                        return OriginalHook(11);
+                    if (TargetHasEffectAny(Debuffs.Addle) && GetDebuffRemainingTime(Debuffs.Addle) >= 3.5)
+                        return WAR.FellCleave;
                 }
 
                 return actionID;
@@ -175,12 +179,20 @@ namespace XIVSlothCombo.Combos.PvE
                 if ((actionID is BLU.AngelWhisper or RDM.Verraise) 
                     || (actionID is SMN.Resurrection && LocalPlayer.ClassJob.Id is SMN.JobID))
                 {
+                    if (ActionReady(LucidDreaming) && LocalPlayer.CurrentMp <= 5000 && CanSpellWeave(actionID))
+                        return LucidDreaming;
+                    if (ActionReady(LucidDreaming) && LocalPlayer.CurrentMp <= 2400)
+                        return LucidDreaming;
+
                     if (HasEffect(Buffs.Swiftcast) || HasEffect(RDM.Buffs.Dualcast))
                         return actionID;
-                    if (IsOffCooldown(Swiftcast))
-                        return Swiftcast;
-                }
 
+                    if (ActionReady(Swiftcast))
+                        return Swiftcast;
+
+                    if (actionID is RDM.Verraise)
+                        return RDM.Vercure;
+                }
                 return actionID;
             }
         }
@@ -194,8 +206,31 @@ namespace XIVSlothCombo.Combos.PvE
             {
                 if (actionID is Feint)
                 {
-                    if (TargetHasEffectAny(Debuffs.Feint) && IsOffCooldown(Feint))
-                        return OriginalHook(11);
+                    if (LocalPlayer.ClassJob.Id == MNK.JobID)
+                    {
+                        if (GetCooldownRemainingTime(Feint) >= 89.3)
+                            return Feint;
+
+                        if (IsOffCooldown(Feint))
+                        {
+                            if (TargetHasEffectAny(Debuffs.Feint) && GetDebuffRemainingTime(Debuffs.Feint) >= 3.5)
+                            {
+                                if (IsOffCooldown(MNK.Mantra))
+                                    return MNK.Mantra;
+                                else
+                                    return BLM.Fire;
+                            }
+                            else
+                                return Feint;
+                        }
+                        else if (IsOffCooldown(MNK.Mantra))
+                            return MNK.Mantra;
+                        else
+                            return Feint;
+                    }
+
+                    if (TargetHasEffectAny(Debuffs.Feint) && GetDebuffRemainingTime(Debuffs.Feint) >= 3.5)
+                        return BLM.Fire;
                 }
 
                 return actionID;
@@ -211,7 +246,7 @@ namespace XIVSlothCombo.Combos.PvE
                 if (actionID is TrueNorth)
                 {
                     if (HasEffect(Buffs.TrueNorth))
-                        return OriginalHook(11);
+                        return BLM.Fire;
                 }
 
                 return actionID;

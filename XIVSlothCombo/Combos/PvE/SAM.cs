@@ -4,6 +4,7 @@ using XIVSlothCombo.Combos.PvE.Content;
 using XIVSlothCombo.Core;
 using XIVSlothCombo.CustomComboNS;
 using XIVSlothCombo.Extensions;
+using static XIVSlothCombo.Combos.JobHelpers.NIN.MudraCasting;
 
 namespace XIVSlothCombo.Combos.PvE
 {
@@ -296,6 +297,19 @@ namespace XIVSlothCombo.Combos.PvE
                                 IsOffCooldown(Variant.VariantRampart) &&
                                 CanWeave(actionID))
                                 return Variant.VariantRampart;
+
+                            if (InMeleeRange())
+                            {
+                                if (CanWeave(actionID))
+                                {
+                                    if (IsEnabled(CustomComboPreset.SAM_Bozja_LostRendArmor) && IsEnabled(Bozja.LostRendArmor) && IsOffCooldown(Bozja.LostRendArmor) &&
+                                        !TargetHasEffectAny(Bozja.Debuffs.LostRendArmor) && EnemyHealthCurrentHp() > 17500 * 3 * 30)
+                                        return Bozja.LostRendArmor;
+                                }
+                                if (IsEnabled(CustomComboPreset.SAM_Bozja_LostAssassination) && IsEnabled(Bozja.LostAssassination) && HasEffect(Bozja.Buffs.BeastEssence) &&
+                                    !HasEffect(Bozja.Buffs.FontOfPower) && EnemyHealthCurrentHp() > 17500 * 3 * 18)
+                                    return Bozja.LostAssassination;
+                            }
 
                             //Death desync check
                             if (HasEffect(All.Buffs.Weakness))

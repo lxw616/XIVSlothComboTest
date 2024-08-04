@@ -4,7 +4,6 @@ using System;
 using XIVSlothCombo.Combos.PvE.Content;
 using XIVSlothCombo.CustomComboNS;
 using XIVSlothCombo.CustomComboNS.Functions;
-using static XIVSlothCombo.Combos.JobHelpers.RDM;
 
 namespace XIVSlothCombo.Combos.PvE
 {
@@ -72,760 +71,301 @@ namespace XIVSlothCombo.Combos.PvE
 
         public static class Config
         {
-            public static UserInt
-                RDM_VariantCure = new("RDM_VariantCure"),
-                RDM_ST_Lucid_Threshold = new("RDM_LucidDreaming_Threshold"),
-                RDM_AoE_Lucid_Threshold = new("RDM_AoE_Lucid_Threshold"),
-                RDM_AoE_MoulinetRange = new("RDM_MoulinetRange");
-            public static UserBool
-                RDM_ST_oGCD_OnAction_Adv = new("RDM_ST_oGCD_OnAction_Adv"),
-                RDM_ST_oGCD_Fleche = new("RDM_ST_oGCD_Fleche"),
-                RDM_ST_oGCD_ContraSixte = new("RDM_ST_oGCD_ContraSixte"),
-                RDM_ST_oGCD_Engagement = new("RDM_ST_oGCD_Engagement"),
-                RDM_ST_oGCD_Engagement_Pooling = new("RDM_ST_oGCD_Engagement_Pooling"),
-                RDM_ST_oGCD_CorpACorps = new("RDM_ST_oGCD_CorpACorps"),
-                RDM_ST_oGCD_CorpACorps_Melee = new("RDM_ST_oGCD_CorpACorps_Melee"),
-                RDM_ST_oGCD_CorpACorps_Pooling = new("RDM_ST_oGCD_CorpACorps_Pooling"),
-                RDM_ST_MeleeCombo_Adv = new("RDM_ST_MeleeCombo_Adv"),
-                RDM_ST_MeleeFinisher_Adv = new("RDM_ST_MeleeFinisher_Adv"),
-                RDM_ST_MeleeEnforced = new("RDM_ST_MeleeEnforced"),
 
-                RDM_AoE_oGCD_OnAction_Adv = new("RDM_AoE_oGCD_OnAction_Adv"),
-                RDM_AoE_oGCD_Fleche = new("RDM_AoE_oGCD_Fleche"),
-                RDM_AoE_oGCD_ContraSixte = new("RDM_AoE_oGCD_ContraSixte"),
-                RDM_AoE_oGCD_Engagement = new("RDM_AoE_oGCD_Engagement"),
-                RDM_AoE_oGCD_Engagement_Pooling = new("RDM_AoE_oGCD_Engagement_Pooling"),
-                RDM_AoE_oGCD_CorpACorps = new("RDM_AoE_oGCD_CorpACorps"),
-                RDM_AoE_oGCD_CorpACorps_Melee = new("RDM_AoE_oGCD_CorpACorps_Melee"),
-                RDM_AoE_oGCD_CorpACorps_Pooling = new("RDM_AoE_oGCD_CorpACorps_Pooling"),
-                RDM_AoE_MeleeCombo_Adv = new("RDM_AoE_MeleeCombo_Adv"),
-                RDM_AoE_MeleeFinisher_Adv = new("RDM_AoE_MeleeFinisher_Adv");
-            public static UserBoolArray
-                RDM_ST_oGCD_OnAction = new("RDM_ST_oGCD_OnAction"),
-                RDM_ST_MeleeCombo_OnAction = new("RDM_ST_MeleeCombo_OnAction"),
-                RDM_ST_MeleeFinisher_OnAction = new("RDM_ST_MeleeFinisher_OnAction"),
-
-                RDM_AoE_oGCD_OnAction = new("RDM_AoE_oGCD_OnAction"),
-                RDM_AoE_MeleeCombo_OnAction = new("RDM_AoE_MeleeCombo_OnAction"),
-                RDM_AoE_MeleeFinisher_OnAction = new("RDM_AoE_MeleeFinisher_OnAction");
-        }
-
-        internal class RDM_VariantVerCure : CustomCombo
-        {
-            protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.RdmAny;
-
-            protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level) =>
-                actionID is Vercure && IsEnabled(CustomComboPreset.RDM_Variant_Cure2) && IsEnabled(Variant.VariantCure)
-                    ? Variant.VariantCure : actionID;
         }
 
         internal class RDM_ST_DPS : CustomCombo
         {
             protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.RDM_ST_DPS;
-
-            protected internal ManaBalancer manaState = new();
-            internal static bool inOpener = false;
-            internal static bool readyOpener = false;
-            internal static bool openerStarted = false;
-            internal static byte step = 0;
-
             protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
             {
-                //MAIN_COMBO_VARIABLES
-                int blackmana = Gauge.BlackMana;
-                int whitemana = Gauge.WhiteMana;
-                //END_MAIN_COMBO_VARIABLES
-
-                if (actionID is Jolt or Jolt2)
+                if (actionID is Verthunder or Verthunder3)
                 {
-                    //VARIANTS
-                    if (IsEnabled(CustomComboPreset.RDM_Variant_Cure) &&
-                        IsEnabled(Variant.VariantCure) &&
-                        PlayerHealthPercentageHp() <= GetOptionValue(Config.RDM_VariantCure))
-                        return Variant.VariantCure;
+                    int blackMana = Gauge.BlackMana;
+                    int whiteMana = Gauge.WhiteMana;
+                    int maxMana = Math.Max(blackMana, whiteMana);
+                    int minMana = Math.Min(blackMana, whiteMana);
+                    int differenceMana = Math.Abs(blackMana - whiteMana);
+                    float emboldenCD = GetCooldownRemainingTime(Embolden);
+                    float targetDistance = GetTargetDistance();
+                    bool AllAttack = IsEnabled(CustomComboPreset.ALL_AllAttack);
 
-                    if (IsEnabled(CustomComboPreset.RDM_Variant_Rampart) &&
-                        IsEnabled(Variant.VariantRampart) &&
-                        IsOffCooldown(Variant.VariantRampart) &&
-                        CanSpellWeave(actionID))
-                        return Variant.VariantRampart;
-
-                    //RDM_BALANCE_OPENER
-                    if (IsEnabled(CustomComboPreset.RDM_Balance_Opener) && level >= 90)
+                    if (InCombat())
                     {
-                        bool inCombat = HasCondition(ConditionFlag.InCombat);
+                        if (ActionReady(All.LucidDreaming) && LocalPlayer.CurrentMp <= 2500)
+                            return All.LucidDreaming;
+                        //oGCD
+                        if (ActionReady(Embolden) && IsEnabled(CustomComboPreset.RDM_Embolden) && (CombatEngageDuration().TotalSeconds >= 20 || GetCooldownRemainingTime(Manafication) >= 5))
+                            return Embolden;
+                        if (ActionReady(Fleche) && (CanSpellWeave(actionID, 0.2) || IsMoving))
+                            return Fleche;
+                        if (ActionReady(ContreSixte) && IsOffCooldown(Jolt) && IsMoving)
+                            return ContreSixte;
 
-                        // Check to start opener
-                        if (openerStarted && lastComboMove is Verthunder3 && HasEffect(Buffs.Dualcast)) { inOpener = true; openerStarted = false; readyOpener = false; }
-                        if ((readyOpener || openerStarted) && !inOpener && LocalPlayer.CastActionId == Verthunder3) { openerStarted = true; return Veraero3; } else { openerStarted = false; }
-
-                        // Reset check for opener
-                        if ((IsEnabled(CustomComboPreset.RDM_Balance_Opener_AnyMana) || (blackmana == 0 && whitemana == 0))
-                            && IsOffCooldown(Embolden) && IsOffCooldown(Manafication) && IsOffCooldown(All.Swiftcast)
-                            && GetRemainingCharges(Acceleration) == 2 && GetRemainingCharges(Corpsacorps) == 2 && GetRemainingCharges(Engagement) == 2
-                            && IsOffCooldown(Fleche) && IsOffCooldown(ContreSixte)
-                            && GetTargetHPPercent() == 100 && !inCombat && !inOpener && !openerStarted)
+                        if (CanSpellWeave(actionID))
                         {
-                            readyOpener = true;
-                            inOpener = false;
-                            step = 0;
-                            return Verthunder3;
-                        }
-                        else
-                        { readyOpener = false; }
-
-                        // Reset if opener is interrupted, requires step 0 and 1 to be explicit since the inCombat check can be slow
-                        if ((step == 0 && lastComboMove is Verthunder3 && !HasEffect(Buffs.Dualcast))
-                            || (inOpener && step >= 1 && IsOffCooldown(actionID) && !inCombat)) inOpener = false;
-
-                        // Start Opener
-                        if (inOpener)
-                        {
-                            //veraero
-                            //swiftcast
-                            //accel
-                            //verthunder
-                            //verthunder
-                            //embolden
-                            //manafication
-                            //Riposte
-                            //Fleche
-                            //Zwercchau
-                            //Contre-sixte
-                            //Redoublement
-                            //Corps-a-corps
-                            //Engagement
-                            //Verholy
-                            //Corps-a-corps
-                            //Engagement
-                            //Scorch
-                            //Resolution
-
-                            //we do it in steps to be able to control it
-                            if (step == 0)
+                            if (ActionReady(Manafication) && ActionReady(Embolden) && CanDelayedWeave(actionID, 1.6, 0.6) && 
+                                !HasEffect(Buffs.Dualcast) && !HasEffect(Buffs.Acceleration) && !HasEffect(All.Buffs.Swiftcast))
                             {
-                                if (lastComboMove == Veraero3) step++;
-                                else return Veraero3;
-                            }
-
-                            if (step == 1)
-                            {
-                                if (IsOnCooldown(All.Swiftcast)) step++;
-                                else return All.Swiftcast;
-                            }
-
-                            if (step == 2)
-                            {
-                                if (GetRemainingCharges(Acceleration) < 2) step++;
-                                else return Acceleration;
-                            }
-
-                            if (step == 3)
-                            {
-                                if (lastComboMove == Verthunder3 && !HasEffect(Buffs.Acceleration)) step++;
-                                else return Verthunder3;
-                            }
-
-                            if (step == 4)
-                            {
-                                if (lastComboMove == Verthunder3 && !HasEffect(All.Buffs.Swiftcast)) step++;
-                                else return Verthunder3;
-                            }
-
-                            if (step == 5)
-                            {
-                                if (IsOnCooldown(Embolden)) step++;
-                                else return Embolden;
-                            }
-
-                            if (step == 6)
-                            {
-                                if (IsOnCooldown(Manafication)) step++;
-                                else return Manafication;
-                            }
-
-                            if (step == 7)
-                            {
-                                if (lastComboMove == Riposte) step++;
-                                else return EnchantedRiposte;
-                            }
-
-                            if (step == 8)
-                            {
-                                if (IsOnCooldown(Fleche)) step++;
-                                else return Fleche;
-                            }
-
-                            if (step == 9)
-                            {
-                                if (lastComboMove == Zwerchhau) step++;
-                                else return EnchantedZwerchhau;
-                            }
-
-                            if (step == 10)
-                            {
-                                if (IsOnCooldown(ContreSixte)) step++;
-                                else return ContreSixte;
-                            }
-
-                            if (step == 11)
-                            {
-                                if (lastComboMove == Redoublement || Gauge.ManaStacks == 3) step++;
-                                else return EnchantedRedoublement;
-                            }
-
-                            if (step == 12)
-                            {
-                                if (GetRemainingCharges(Corpsacorps) < 2) step++;
-                                else return Corpsacorps;
-                            }
-
-                            if (step == 13)
-                            {
-                                if (GetRemainingCharges(Engagement) < 2) step++;
-                                else return Engagement;
-                            }
-
-                            if (step == 14)
-                            {
-                                if (lastComboMove == Verholy) step++;
-                                else return Verholy;
-                            }
-
-                            if (step == 15)
-                            {
-                                if (GetRemainingCharges(Corpsacorps) < 1) step++;
-                                else return Corpsacorps;
-                            }
-
-                            if (step == 16)
-                            {
-                                if (GetRemainingCharges(Engagement) < 1) step++;
-                                else return Engagement;
-                            }
-
-                            if (step == 17)
-                            {
-                                if (lastComboMove == Scorch) step++;
-                                else return Scorch;
-                            }
-
-                            if (step == 18)
-                            {
-                                if (lastComboMove == Resolution) step++;
-                                else return Resolution;
-                            }
-
-                            inOpener = false;
-                        }
-                    }
-                    //END_RDM_BALANCE_OPENER
-
-                }
-
-                //Lucid Dreaming
-                if (IsEnabled(CustomComboPreset.RDM_ST_Lucid)
-                    && actionID is Jolt or Jolt2
-                    && All.CanUseLucid(actionID, Config.RDM_ST_Lucid_Threshold)
-                    && InCombat()
-                    && RDMLucid.SafetoUse(lastComboMove)) //Don't interupt certain combos
-                    return All.LucidDreaming;
-
-                //RDM_OGCD
-                if (IsEnabled(CustomComboPreset.RDM_ST_oGCD))
-                {
-                    bool ActionFound =
-                        ((!Config.RDM_ST_oGCD_OnAction_Adv && actionID is Jolt or Jolt2) ||
-                          (Config.RDM_ST_oGCD_OnAction_Adv &&
-                            ((Config.RDM_ST_oGCD_OnAction[0] && actionID is Jolt or Jolt2) ||
-                             (Config.RDM_ST_oGCD_OnAction[1] && actionID is Fleche) ||
-                             (Config.RDM_ST_oGCD_OnAction[2] && actionID is Riposte) ||
-                             (Config.RDM_ST_oGCD_OnAction[3] && actionID is Reprise)
-                            )
-                          )
-                        );
-                    if (ActionFound && LevelChecked(Corpsacorps))
-                    {
-                        if (OGCDHelper.CanUse(actionID, true, out uint oGCDAction)) return oGCDAction;
-                    }
-                }
-                //END_RDM_OGCD
-
-                //RDM_MELEEFINISHER
-                if (IsEnabled(CustomComboPreset.RDM_ST_MeleeFinisher))
-                {
-                    bool ActionFound =
-                        (!Config.RDM_ST_MeleeFinisher_Adv && actionID is Jolt or Jolt2) ||
-                        (Config.RDM_ST_MeleeFinisher_Adv &&
-                            ((Config.RDM_ST_MeleeFinisher_OnAction[0] && actionID is Jolt or Jolt2) ||
-                             (Config.RDM_ST_MeleeFinisher_OnAction[1] && actionID is Riposte or EnchantedRiposte) ||
-                             (Config.RDM_ST_MeleeFinisher_OnAction[2] && actionID is Veraero or Veraero3 or Verthunder or Verthunder3)));
-
-                    if (ActionFound && MeleeFinisher.CanUse(lastComboMove, out uint finisherAction))
-                        return finisherAction;
-                }
-                //END_RDM_MELEEFINISHER
-
-                //RDM_ST_MELEECOMBO
-                if (IsEnabled(CustomComboPreset.RDM_ST_MeleeCombo)
-                    && LocalPlayer.IsCasting == false)
-                {
-                    bool ActionFound =
-                        (!Config.RDM_ST_MeleeCombo_Adv && actionID is Jolt or Jolt2) ||
-                        (Config.RDM_ST_MeleeCombo_Adv &&
-                            ((Config.RDM_ST_MeleeCombo_OnAction[0] && actionID is Jolt or Jolt2) ||
-                             (Config.RDM_ST_MeleeCombo_OnAction[1] && actionID is Riposte or EnchantedRiposte)));
-
-                    if (ActionFound)
-                    {
-                        //RDM_ST_MANAFICATIONEMBOLDEN
-                        if (IsEnabled(CustomComboPreset.RDM_ST_MeleeCombo_ManaEmbolden)
-                            && LevelChecked(Embolden)
-                            && HasCondition(ConditionFlag.InCombat)
-                            && !HasEffect(Buffs.Dualcast)
-                            && !HasEffect(All.Buffs.Swiftcast)
-                            && !HasEffect(Buffs.Acceleration)
-                            && (GetTargetDistance() <= 3 || (IsEnabled(CustomComboPreset.RDM_ST_MeleeCombo_CorpsGapCloser) && HasCharges(Corpsacorps))))
-                        {
-                            //Situation 1: Manafication first
-                            if (IsEnabled(CustomComboPreset.RDM_ST_MeleeCombo_ManaEmbolden_DoubleCombo)
-                                && level >= 90
-                                && Gauge.ManaStacks == 0
-                                && lastComboMove is not Verflare
-                                && lastComboMove is not Verholy
-                                && lastComboMove is not Scorch
-                                && Math.Max(blackmana, whitemana) <= 50
-                                && (Math.Max(blackmana, whitemana) >= 42
-                                    || (IsEnabled(CustomComboPreset.RDM_ST_MeleeCombo_UnbalanceMana) && blackmana == whitemana && blackmana >= 38 && HasCharges(Acceleration)))
-                                && Math.Min(blackmana, whitemana) >= 31
-                                && IsOffCooldown(Manafication)
-                                && (IsOffCooldown(Embolden) || GetCooldownRemainingTime(Embolden) <= 3))
-                            {
-                                if (IsEnabled(CustomComboPreset.RDM_ST_MeleeCombo_UnbalanceMana)
-                                    && blackmana == whitemana
-                                    && blackmana <= 44
-                                    && blackmana >= 38
-                                    && HasCharges(Acceleration))
+                                if (ActionReady(All.Swiftcast))
+                                    return All.Swiftcast;
+                                if (ActionReady(Acceleration))
                                     return Acceleration;
-
+                            }
+                            if (ActionReady(ContreSixte))
+                                return ContreSixte;
+                            if (ActionReady(Manafication) && IsEnabled(CustomComboPreset.RDM_ST_DPS_Manafication)
+                                && !(lastComboMove is Riposte or EnchantedRiposte or Zwerchhau or EnchantedZwerchhau) && maxMana <= 50 &&
+                                (ActionReady(Embolden) || Gauge.ManaStacks == 3 || !(HasEffect(Buffs.VerfireReady) && HasEffect(Buffs.VerstoneReady) && maxMana <= 99 && !IsMoving)))
                                 return Manafication;
-                            }
-                            if (IsEnabled(CustomComboPreset.RDM_ST_MeleeCombo_ManaEmbolden_DoubleCombo)
-                                && level >= 90
-                                && lastComboMove is Zwerchhau or EnchantedZwerchhau
-                                && Math.Max(blackmana, whitemana) >= 57
-                                && Math.Min(blackmana, whitemana) >= 46
-                                && GetCooldownRemainingTime(Manafication) >= 100
-                                && IsOffCooldown(Embolden))
-                            {
-                                return Embolden;
-                            }
 
-                            //Situation 2: Embolden first
-                            if (IsEnabled(CustomComboPreset.RDM_ST_MeleeCombo_ManaEmbolden_DoubleCombo)
-                                && level >= 90
-                                && lastComboMove is Zwerchhau or EnchantedZwerchhau
-                                && Math.Max(blackmana, whitemana) <= 57
-                                && Math.Min(blackmana, whitemana) <= 46
-                                && (GetCooldownRemainingTime(Manafication) <= 7 || IsOffCooldown(Manafication))
-                                && IsOffCooldown(Embolden))
-                            {
-                                return Embolden;
-                            }
-                            if (IsEnabled(CustomComboPreset.RDM_ST_MeleeCombo_ManaEmbolden_DoubleCombo)
-                                && level >= 90
-                                && (Gauge.ManaStacks == 0 || Gauge.ManaStacks == 3)
-                                && lastComboMove is not Verflare
-                                && lastComboMove is not Verholy
-                                && lastComboMove is not Scorch
-                                && Math.Max(blackmana, whitemana) <= 50
-                                && (HasEffect(Buffs.Embolden) || WasLastAction(Embolden))
-                                && IsOffCooldown(Manafication))
-                            {
-                                return Manafication;
-                            }
-
-                            //Situation 3: Just use them together
-                            if ((IsNotEnabled(CustomComboPreset.RDM_ST_MeleeCombo_ManaEmbolden_DoubleCombo) || level < 90)
-                                && ActionReady(Embolden)
-                                && Gauge.ManaStacks == 0
-                                && Math.Max(blackmana, whitemana) <= 50
-                                && (IsOffCooldown(Manafication) || !LevelChecked(Manafication)))
-                            {
-                                if (IsEnabled(CustomComboPreset.RDM_ST_MeleeCombo_UnbalanceMana)
-                                    && blackmana == whitemana
-                                    && blackmana <= 44
-                                    && HasCharges(Acceleration))
-                                    return Acceleration;
-
-                                return Embolden;
-                            }
-                            if ((IsNotEnabled(CustomComboPreset.RDM_ST_MeleeCombo_ManaEmbolden_DoubleCombo) || level < 90)
-                                && ActionReady(Manafication)
-                                && (Gauge.ManaStacks == 0 || Gauge.ManaStacks == 3)
-                                && lastComboMove is not Verflare
-                                && lastComboMove is not Verholy
-                                && lastComboMove is not Scorch
-                                && Math.Max(blackmana, whitemana) <= 50
-                                && (HasEffect(Buffs.Embolden) || WasLastAction(Embolden)))
-                            {
-                                return Manafication;
-                            }
-
-                            //Situation 4: Level 58 or 59
-                            if (!LevelChecked(Manafication) &&
-                                ActionReady(Embolden) &&
-                                Math.Min(blackmana, whitemana) >= 50)
-                            {
-                                return Embolden;
-                            }
-
-                        } //END_RDM_ST_MANAFICATIONEMBOLDEN
-
-                        //Normal Combo
-                        if (GetTargetDistance() <= 3 || Config.RDM_ST_MeleeEnforced)
-                        {
-                            if ((lastComboMove is Riposte or EnchantedRiposte)
-                                && LevelChecked(Zwerchhau)
-                                && comboTime > 0f)
-                                return OriginalHook(Zwerchhau);
-
-                            if (lastComboMove is Zwerchhau
-                                && LevelChecked(Redoublement)
-                                && comboTime > 0f)
-                                return OriginalHook(Redoublement);
-                        }
-
-                        if (((Math.Min(Gauge.WhiteMana, Gauge.BlackMana) >= 50 && LevelChecked(Redoublement))
-                            || (Math.Min(Gauge.WhiteMana, Gauge.BlackMana) >= 35 && !LevelChecked(Redoublement))
-                            || (Math.Min(Gauge.WhiteMana, Gauge.BlackMana) >= 20 && !LevelChecked(Zwerchhau)))
-                            && !HasEffect(Buffs.Dualcast))
-                        {
-                            if (IsEnabled(CustomComboPreset.RDM_ST_MeleeCombo_CorpsGapCloser)
-                                && LevelChecked(Corpsacorps) && HasCharges(Corpsacorps)
-                                && GetTargetDistance() > 3)
+                            if (ActionReady(Engagement) && IsEnabled(CustomComboPreset.RDM_ST_DPS_Engagement) && targetDistance <= 3 &&
+                                GetRemainingCharges(Engagement) >= 1 && GetCooldownChargeRemainingTime(Engagement) <= 2.5 && (emboldenCD > 0.7 || !LevelChecked(Embolden)))
+                                return Engagement;
+                            if (ActionReady(Corpsacorps) && IsEnabled(CustomComboPreset.RDM_ST_DPS_Corpsacorps) && !IsMoving && //targetDistance <= 1 && 
+                                GetRemainingCharges(Corpsacorps) >= 1 && GetCooldownChargeRemainingTime(Corpsacorps) <= 2.5)
                                 return Corpsacorps;
-
-                            if (IsEnabled(CustomComboPreset.RDM_ST_MeleeCombo_UnbalanceMana)
-                                && LevelChecked(Acceleration)
-                                && blackmana == whitemana
-                                && blackmana >= 50
-                                && !HasEffect(Buffs.Embolden))
-                            {
-                                if (HasEffect(Buffs.Acceleration) || WasLastAction(Buffs.Acceleration))
-                                {
-                                    //Run the Mana Balance Computer
-                                    manaState.CheckBalance();
-                                    if (manaState.useAero && LevelChecked(OriginalHook(Veraero))) return OriginalHook(Veraero);
-                                    if (manaState.useThunder && LevelChecked(OriginalHook(Verthunder))) return OriginalHook(Verthunder);
-                                }
-
-                                if (HasCharges(Acceleration)) return Acceleration;
-                            }
-                            if (GetTargetDistance() <= 3)
-                            return OriginalHook(Riposte);
+                            if (ActionReady(All.LucidDreaming) && LocalPlayer.CurrentMp <= 8500)
+                                return All.LucidDreaming;
                         }
-
                     }
-                }
-                //END_RDM_ST_MELEECOMBO
 
-                //RDM_ST_ACCELERATION
-                if (IsEnabled(CustomComboPreset.RDM_ST_ThunderAero) && IsEnabled(CustomComboPreset.RDM_ST_ThunderAero_Accel)
-                    && actionID is Jolt or Jolt2
-                    && HasCondition(ConditionFlag.InCombat)
-                    && LocalPlayer.IsCasting == false
-                    && Gauge.ManaStacks == 0
-                    && lastComboMove is not Verflare
-                    && lastComboMove is not Verholy
-                    && lastComboMove is not Scorch
-                    && !HasEffect(Buffs.VerfireReady)
-                    && !HasEffect(Buffs.VerstoneReady)
-                    && !HasEffect(Buffs.Acceleration)
-                    && !HasEffect(Buffs.Dualcast)
-                    && !HasEffect(All.Buffs.Swiftcast))
-                {
-                    if (ActionReady(Acceleration)
-                        && GetCooldown(Acceleration).ChargeCooldownRemaining < 54.5)
-                        return Acceleration;
-                    if (IsEnabled(CustomComboPreset.RDM_ST_ThunderAero_Accel_Swiftcast)
-                        && ActionReady(All.Swiftcast)
-                        && !HasCharges(Acceleration))
-                        return All.Swiftcast;
-                }
-                //END_RDM_ST_ACCELERATION
+                    //GCD
+                    if (LevelChecked(Resolution) && lastComboMove is Scorch)
+                        return Resolution;
+                    if (LevelChecked(Scorch) && lastComboMove is Verholy or Verflare)
+                        return Scorch;
+                    if (Gauge.ManaStacks == 3)
+                    {
+                        if (differenceMana <= 30 - 11)
+                        {
+                            if (LevelChecked(Verholy) && HasEffect(Buffs.VerfireReady))
+                                return Verholy;
+                            if (LevelChecked(Verflare) && HasEffect(Buffs.VerstoneReady))
+                                return Verflare;
+                        }
+                        if (LevelChecked(Verholy) && blackMana >= whiteMana)
+                            return Verholy;
+                        if (LevelChecked(Verflare) && blackMana < whiteMana)
+                            return Verflare;
+                    }
+                    if (LevelChecked(Redoublement) && lastComboMove is Zwerchhau or EnchantedZwerchhau)
+                        return OriginalHook(Redoublement);
+                    if (LevelChecked(Zwerchhau) && lastComboMove is Riposte or EnchantedRiposte)
+                        return OriginalHook(Zwerchhau);
 
-                //RDM_VERFIREVERSTONE
-                if (IsEnabled(CustomComboPreset.RDM_ST_FireStone)
-                    && actionID is Jolt or Jolt2
-                    && !HasEffect(Buffs.Acceleration)
-                    && !HasEffect(Buffs.Dualcast))
-                {
-                    //Run the Mana Balance Computer
-                    manaState.CheckBalance();
-                    if (manaState.useFire) return Verfire;
-                    if (manaState.useStone) return Verstone;
-                }
-                //END_RDM_VERFIREVERSTONE
+                    if (IsEnabled(CustomComboPreset.RDM_Vercure) && LevelChecked(Vercure) && PlayerHealthPercentageHp() <= 40)
+                        return Vercure;
 
-                //RDM_VERTHUNDERVERAERO
-                if (IsEnabled(CustomComboPreset.RDM_ST_ThunderAero)
-                    && actionID is Jolt or Jolt2)
-                {
-                    //Run the Mana Balance Computer
-                    manaState.CheckBalance();
-                    if (manaState.useThunder) return OriginalHook(Verthunder);
-                    if (manaState.useAero) return OriginalHook(Veraero);
-                }
-                //END_RDM_VERTHUNDERVERAERO
+                    if (IsEnabled(CustomComboPreset.RDM_ST_DPS_TwoTarget) && (HasEffect(Buffs.Dualcast) || HasEffect(Buffs.Acceleration) || HasEffect(All.Buffs.Swiftcast)))
+                        return OriginalHook(Scatter);
+                    
+                    if (HasEffect(Buffs.Acceleration) && differenceMana <= 30 - 6)
+                    {
+                        if (LevelChecked(Verthunder) && HasEffect(Buffs.VerstoneReady))
+                            return OriginalHook(Verthunder);
+                        if (LevelChecked(Veraero) && HasEffect(Buffs.VerfireReady))
+                            return OriginalHook(Veraero);
+                    }
+                    if (HasEffect(Buffs.Dualcast) || HasEffect(Buffs.Acceleration) || HasEffect(All.Buffs.Swiftcast))
+                    {
+                        if (blackMana > whiteMana && LevelChecked(Veraero))
+                            return OriginalHook(Veraero);
+                        if (blackMana <= whiteMana && LevelChecked(Verthunder))
+                            return OriginalHook(Verthunder);
+                    }
 
-                //NO_CONDITIONS_MET
+                    //赤飞石和赤火炎的buff同时存在并且还能打魔6连的话，先泄掉一个，即使是在爆发期内
+                    if (HasEffect(Buffs.VerfireReady) && HasEffect(Buffs.VerstoneReady) && maxMana <= 99 && !IsMoving)
+                    {
+                        if (blackMana >= whiteMana)
+                            return Verstone;
+                        if (blackMana < whiteMana)
+                            return Verfire;
+                    }
+
+                    //魔回刺，最麻烦
+                    if (IsEnabled(CustomComboPreset.RDM_ST_DPS_Riposte) && minMana >= 20 + (LevelChecked(Zwerchhau) ? 1 : 0) * 15 + (LevelChecked(Redoublement) ? 1 : 0) * 15 && targetDistance <= 4)
+                    {
+                        //防溢出系列
+                        if (AllAttack || minMana >= 92 || maxMana >= 98)
+                            return OriginalHook(Riposte);
+                        //AOE切单体
+                        if (Gauge.ManaStacks > 0)
+                            return OriginalHook(Riposte);
+                        if (GetCooldownRemainingTime(Manafication) >= 95)
+                            return OriginalHook(Riposte);
+
+                        if (LevelChecked(Embolden))
+                        {
+                            if (emboldenCD >= 100)
+                                return OriginalHook(Riposte);
+                            if (minMana >= 50) //83)
+                            {
+                                if (level == 90 && IsOnCooldown(Embolden) && emboldenCD <= 6.2 && (GetCooldownRemainingTime(Manafication) <= 12 || (minMana >= 81 && maxMana >= 92)))
+                                    return OriginalHook(Riposte);
+                                if (level < 90 && level >= 80 && IsOnCooldown(Embolden) && emboldenCD <= 3.7 && (GetCooldownRemainingTime(Manafication) <= 9.5 || (minMana >= 85 && maxMana >= 96)))
+                                    return OriginalHook(Riposte);
+                                if (level < 80 && IsOnCooldown(Embolden) && emboldenCD <= 1.2 && (GetCooldownRemainingTime(Manafication) <= 9.5 || (minMana >= 85 && maxMana >= 96)))
+                                    return OriginalHook(Riposte);
+                            }
+                            if (emboldenCD >= 27.5)//if (emboldenCD >= 42.5)
+                                return OriginalHook(Riposte);
+                        }
+                        if (InCombat() && HasBattleTarget() && IsOffCooldown(Jolt) && IsMoving)
+                            return OriginalHook(Riposte);
+                        if (!LevelChecked(Embolden))
+                            return OriginalHook(Riposte);
+                    }
+
+                    if (InCombat() && HasBattleTarget() && IsMoving && IsOffCooldown(Jolt) && !HasEffect(Buffs.Dualcast))
+                    {
+                        if (ActionReady(All.Swiftcast) && !HasEffect(Buffs.Acceleration))
+                            return All.Swiftcast;
+                        if (ActionReady(Acceleration) && !HasEffect(All.Buffs.Swiftcast))
+                            return Acceleration;
+                    }
+
+                    /*魔续斩，但技能太烂了
+                    if (InCombat() && HasBattleTarget() && IsMoving && IsOffCooldown(Jolt) && IsOnCooldown(All.Swiftcast) && GetRemainingCharges(Acceleration) == 0)
+                    {
+                        if (ActionReady(Reprise) && minMana >= 5)
+                            return OriginalHook(Reprise);
+                    }
+                    */
+
+                    if (HasEffect(Buffs.VerfireReady))
+                        return Verfire;
+                    if (HasEffect(Buffs.VerstoneReady))
+                        return Verstone;
+                    if (!LevelChecked(Verthunder))
+                    {
+                        if (LevelChecked(Jolt))
+                            return OriginalHook(Jolt);
+                        if (LevelChecked(Riposte))
+                            return Riposte;
+                    }
+
+                    if (!IsEnabled(CustomComboPreset.RDM_ST_DPS_JoltFirst) && !InCombat())
+                        return OriginalHook(Verthunder);
+                    return OriginalHook(Jolt);
+                }
                 return actionID;
             }
         }
 
-        internal class RDM_AoE_DPS : CustomCombo
+        internal class RDM_AoE : CustomCombo
         {
-            protected internal ManaBalancer manaState = new();
-            protected internal MeleeFinisher meleeFinisher = new();
-            protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.RDM_AoE_DPS;
+            protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.RDM_AOE;
             protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
             {
                 int black = Gauge.BlackMana;
                 int white = Gauge.WhiteMana;
+                float targetDistance = GetTargetDistance();
+                int minMana = Math.Min(black, white);
+                float emboldenCD = GetCooldownRemainingTime(Embolden);
 
-                //VARIANTS
-                if (IsEnabled(CustomComboPreset.RDM_Variant_Cure) &&
-                    IsEnabled(Variant.VariantCure) &&
-                    PlayerHealthPercentageHp() <= GetOptionValue(Config.RDM_VariantCure))
-                    return Variant.VariantCure;
-
-                if (IsEnabled(CustomComboPreset.RDM_Variant_Rampart) &&
-                    IsEnabled(Variant.VariantRampart) &&
-                    IsOffCooldown(Variant.VariantRampart) &&
-                    CanSpellWeave(actionID))
-                    return Variant.VariantRampart;
-
-                // LUCID
-                if (IsEnabled(CustomComboPreset.RDM_AoE_Lucid)
-                    && actionID is Scatter or Impact
-                    && All.CanUseLucid(actionID, Config.RDM_AoE_Lucid_Threshold)
-                    && InCombat()
-                    && RDMLucid.SafetoUse(lastComboMove))
-                    return All.LucidDreaming;
-
-                //RDM_OGCD
-                if (IsEnabled(CustomComboPreset.RDM_AoE_oGCD)
-                    && LevelChecked(Corpsacorps) &&
-                    actionID is Scatter or Impact &&
-                    OGCDHelper.CanUse(actionID, false, out uint oGCDAction)) return oGCDAction;
-
-                //RDM_MELEEFINISHER
-                if (IsEnabled(CustomComboPreset.RDM_AoE_MeleeFinisher))
-                {
-                    bool ActionFound =
-                        (!Config.RDM_AoE_MeleeFinisher_Adv && actionID is Scatter or Impact) ||
-                        (Config.RDM_AoE_MeleeFinisher_Adv &&
-                            ((Config.RDM_AoE_MeleeFinisher_OnAction[0] && actionID is Scatter or Impact) ||
-                             (Config.RDM_AoE_MeleeFinisher_OnAction[1] && actionID is Moulinet or EnchantedMoulinet) ||
-                             (Config.RDM_AoE_MeleeFinisher_OnAction[2] && actionID is Veraero2 or Verthunder2)));
-
-
-                    if (ActionFound && MeleeFinisher.CanUse(lastComboMove, out uint finisherAction))
-                        return finisherAction;
-                }
-                //END_RDM_MELEEFINISHER
-
-                //RDM_AOE_MELEECOMBO
-                if (IsEnabled(CustomComboPreset.RDM_AoE_MeleeCombo))
-                {
-                    bool ActionFound =
-                        (!Config.RDM_AoE_MeleeCombo_Adv && actionID is Scatter or Impact) ||
-                        (Config.RDM_AoE_MeleeCombo_Adv &&
-                            ((Config.RDM_AoE_MeleeCombo_OnAction[0] && actionID is Scatter or Impact) ||
-                                (Config.RDM_AoE_MeleeCombo_OnAction[1] && actionID is Moulinet or EnchantedMoulinet)));
-
-
-                    if (ActionFound)
-                    {
-                        //RDM_AOE_MANAFICATIONEMBOLDEN
-                        if (IsEnabled(CustomComboPreset.RDM_AoE_MeleeCombo_ManaEmbolden))
-                        {
-                            if (HasCondition(ConditionFlag.InCombat)
-                                && !HasEffect(Buffs.Dualcast)
-                                && !HasEffect(All.Buffs.Swiftcast)
-                                && !HasEffect(Buffs.Acceleration)
-                                && ((GetTargetDistance() <= Config.RDM_AoE_MoulinetRange && Gauge.ManaStacks == 0) || Gauge.ManaStacks > 0))
-                            {
-                                if (ActionReady(Manafication))
-                                {
-                                    //Situation 1: Embolden First (Double)
-                                    if (Gauge.ManaStacks == 2
-                                        && Math.Min(black, white) >= 22
-                                        && IsOffCooldown(Embolden))
-                                    {
-                                        return Embolden;
-                                    }
-                                    if (((Gauge.ManaStacks == 3 && Math.Min(black, white) >= 2) || (Gauge.ManaStacks == 0 && Math.Min(black, white) >= 10))
-                                        && lastComboMove is not Verflare
-                                        && lastComboMove is not Verholy
-                                        && lastComboMove is not Scorch
-                                        && Math.Max(black, white) <= 50
-                                        && (HasEffect(Buffs.Embolden) || WasLastAction(Embolden)))
-                                    {
-                                        return Manafication;
-                                    }
-
-                                    //Situation 2: Embolden First (Single)
-                                    if (Gauge.ManaStacks == 0
-                                        && lastComboMove is not Verflare
-                                        && lastComboMove is not Verholy
-                                        && lastComboMove is not Scorch
-                                        && Math.Max(black, white) <= 50
-                                        && Math.Min(black, white) >= 10
-                                        && IsOffCooldown(Embolden))
-                                    {
-                                        return Embolden;
-                                    }
-                                    if (Gauge.ManaStacks == 0
-                                        && lastComboMove is not Verflare
-                                        && lastComboMove is not Verholy
-                                        && lastComboMove is not Scorch
-                                        && Math.Max(black, white) <= 50
-                                        && Math.Min(black, white) >= 10
-                                        && (HasEffect(Buffs.Embolden) || WasLastAction(Embolden)))
-                                    {
-                                        return Manafication;
-                                    }
-                                }
-
-                                //Below Manafication Level
-                                if (ActionReady(Embolden) && !LevelChecked(Manafication)
-                                    && Math.Min(black, white) >= 20)
-                                {
-                                    return Embolden;
-                                }
-                            }
-                            //END_RDM_AOE_MANAFICATIONEMBOLDEN
-                        }
-
-                        if (LevelChecked(Moulinet)
-                            && LocalPlayer.IsCasting == false
-                            && !HasEffect(Buffs.Dualcast)
-                            && !HasEffect(All.Buffs.Swiftcast)
-                            && !HasEffect(Buffs.Acceleration)
-                            && ((Math.Min(Gauge.BlackMana, Gauge.WhiteMana) + (Gauge.ManaStacks * 20) >= 60) ||
-                                (!LevelChecked(Verflare) && Math.Min(Gauge.BlackMana, Gauge.WhiteMana) >= 20)))
-                        {
-                            if (IsEnabled(CustomComboPreset.RDM_AoE_MeleeCombo_CorpsGapCloser)
-                                && ActionReady(Corpsacorps)
-                                && GetTargetDistance() > Config.RDM_AoE_MoulinetRange)
-                                return Corpsacorps;
-
-                            if ((GetTargetDistance() <= Config.RDM_AoE_MoulinetRange && Gauge.ManaStacks == 0) || Gauge.ManaStacks >= 1)
-                                return OriginalHook(Moulinet);
-                        }
-                    }
-                }
-                //END_RDM_AOE_MELEECOMBO
-
-                //RDM_AoE_ACCELERATION
-                if (IsEnabled(CustomComboPreset.RDM_AoE_Accel)
-                    && actionID is Scatter or Impact
-                    && LocalPlayer.IsCasting == false
-                    && Gauge.ManaStacks == 0
-                    && lastComboMove is not Verflare
-                    && lastComboMove is not Verholy
-                    && lastComboMove is not Scorch
-                    && !WasLastAction(Embolden)
-                    && (IsNotEnabled(CustomComboPreset.RDM_AoE_Accel_Weave) || CanSpellWeave(actionID))
-                    && !HasEffect(Buffs.Acceleration)
-                    && !HasEffect(Buffs.Dualcast)
-                    && !HasEffect(All.Buffs.Swiftcast))
-                {
-                    //if (level >= Levels.Acceleration
-                    //    && GetCooldown(Acceleration).RemainingCharges > 0
-                    //    && GetCooldown(Acceleration).ChargeCooldownRemaining < 54.5)
-                    if (ActionReady(Acceleration) //check for level and 1 charge minimum
-                        && GetCooldown(Acceleration).ChargeCooldownRemaining < 54.5)
-                        return Acceleration;
-                    if (IsEnabled(CustomComboPreset.RDM_AoE_Accel_Swiftcast)
-                        && ActionReady(All.Swiftcast)
-                        && !HasCharges(Acceleration)
-                        && GetCooldown(Acceleration).ChargeCooldownRemaining < 54.5)
-                        return All.Swiftcast;
-                }
-                //END_RDM_AoE_ACCELERATION
-
-                //RDM_VERTHUNDERIIVERAEROII
                 if (actionID is Scatter or Impact)
                 {
-                    manaState.CheckBalance();
-                    if (manaState.useThunder2) return OriginalHook(Verthunder2);
-                    if (manaState.useAero2) return OriginalHook(Veraero2);
-                }
-                //END_RDM_VERTHUNDERIIVERAEROII
+                    if (InCombat())
+                    {
+                        if (ActionReady(All.LucidDreaming) && LocalPlayer.CurrentMp <= 2500)
+                            return All.LucidDreaming;
+                        //oGCD
+                        if (CanSpellWeave(actionID, 0.4))
+                        {
+                            //跟单体目标的鼓励共用吧
+                            if (ActionReady(Embolden) && IsEnabled(CustomComboPreset.RDM_Embolden))
+                                return Embolden;
+                            if (ActionReady(Manafication) && !(lastComboMove is Riposte or EnchantedRiposte or Zwerchhau or EnchantedZwerchhau) && Math.Max(Gauge.BlackMana, Gauge.WhiteMana) <= 50)
+                                return Manafication;
+                            if (ActionReady(Fleche))
+                                return Fleche;
+                            if (ActionReady(ContreSixte))
+                                return ContreSixte;
+                        }
+                        if (CanSpellWeave(actionID))
+                        {
+                            if (ActionReady(Acceleration) && !HasEffect(Buffs.Acceleration))
+                                return Acceleration;
+                            if (ActionReady(Engagement) && IsEnabled(CustomComboPreset.RDM_ST_DPS_Engagement) && targetDistance <= 3 &&
+                                GetRemainingCharges(Engagement) >= 1 && GetCooldownChargeRemainingTime(Engagement) <= 2.5)
+                                return Engagement;
+                            if (ActionReady(Corpsacorps) && IsEnabled(CustomComboPreset.RDM_ST_DPS_Corpsacorps) && targetDistance <= 1 && !IsMoving &&
+                                GetRemainingCharges(Acceleration) >= 1 && GetCooldownChargeRemainingTime(Acceleration) <= 2.5)
+                                return Corpsacorps;
 
+                            if (ActionReady(All.LucidDreaming) && LocalPlayer.CurrentMp <= 5000)
+                                return All.LucidDreaming;
+                        }
+                    }
+
+                    //GCD
+                    if (LevelChecked(Resolution) && lastComboMove is Scorch)
+                        return Resolution;
+                    if (LevelChecked(Scorch) && lastComboMove is Verholy or Verflare)
+                        return Scorch;
+                    if (Gauge.ManaStacks == 3)
+                    {
+                        if (LevelChecked(Verholy) && black >= white)
+                            return Verholy;
+                        if (LevelChecked(Verflare) && (black < white || !LevelChecked(Verholy)))
+                            return Verflare;
+                    }
+                    if (Gauge.ManaStacks > 0 && minMana >= 20)
+                        return OriginalHook(EnchantedMoulinet);
+
+                    if (IsEnabled(CustomComboPreset.RDM_ULK))
+                    {
+                        if (GetBuffRemainingTime(1687) <= 3 && PlayerHealthPercentageHp() <= 85)
+                            return 12993;//文理再生
+                    }
+                    if (IsEnabled(CustomComboPreset.RDM_Vercure) && PlayerHealthPercentageHp() <= 40)
+                        return Vercure;
+
+                    if (HasEffect(Buffs.Dualcast) || (HasEffect(All.Buffs.Swiftcast) && LevelChecked(Scorch)))
+                        return OriginalHook(Scatter);
+
+                    if (LevelChecked(Moulinet) && minMana >= 20 && (minMana + Gauge.ManaStacks * 20 >= 60 || !LevelChecked(Verflare)) && targetDistance <= 5)
+                        return OriginalHook(EnchantedMoulinet);
+
+                    if (InCombat() && HasBattleTarget() && IsMoving && IsOffCooldown(Jolt) && !HasEffect(Buffs.Dualcast))
+                    {
+                        if (ActionReady(All.Swiftcast) && !HasEffect(Buffs.Acceleration))
+                            return All.Swiftcast;
+                        if (ActionReady(Acceleration) && !HasEffect(All.Buffs.Swiftcast))
+                            return Acceleration;
+                    }
+
+                    if (HasEffect(Buffs.Acceleration) || HasEffect(All.Buffs.Swiftcast))
+                        return OriginalHook(Scatter);
+
+                    if (LevelChecked(Verthunder2) && black <= white)
+                        return OriginalHook(Verthunder2);
+                    if (LevelChecked(Veraero2) && black > white)
+                        return OriginalHook(Veraero2);
+
+                    if (!LevelChecked(Verthunder2) && LevelChecked(Scatter))
+                        return Jolt;
+                }
                 return actionID;
             }
         }
-
-        /*
-        RDM_Verraise
-        Swiftcast combos to Verraise when:
-        -Swiftcast is on cooldown.
-        -Swiftcast is available, but we we have Dualcast (Dualcasting Verraise)
-        Using this variation other than the alternate feature style, as Verraise is level 63
-        and swiftcast is unlocked way earlier and in theory, on a hotbar somewhere
-        */
-        internal class RDM_Verraise : CustomCombo
+        internal class RDM_Acceleration_SwiftCast : CustomCombo
         {
-            protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.RDM_Raise;
+            protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.RDM_Acceleration_SwiftCast;
+
             protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
             {
-                if (actionID is All.Swiftcast)
+                if (actionID is Acceleration)
                 {
-                    if (HasEffect(All.Buffs.Swiftcast) && IsEnabled(CustomComboPreset.SMN_Variant_Raise) && IsEnabled(Variant.VariantRaise))
-                        return Variant.VariantRaise;
-
-                    if (LevelChecked(Verraise) &&
-                        (GetCooldownRemainingTime(All.Swiftcast) > 0 ||     // Condition 1: Swiftcast is on cooldown
-                        HasEffect(Buffs.Dualcast)))                              // Condition 2: Swiftcast is available, but we have Dualcast)
-                        return Verraise;
+                    if (GetCooldownRemainingTime(All.Swiftcast) >= 59.2)
+                        return All.Swiftcast;
+                    if (ActionReady(All.Swiftcast) && GetRemainingCharges(Acceleration) != 2)
+                        return All.Swiftcast;
                 }
-
-                // Else we just exit normally and return Swiftcast
                 return actionID;
             }
-        }
-
-        internal class RDM_CorpsDisplacement : CustomCombo
-        {
-            protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.RDM_CorpsDisplacement;
-            protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level) =>
-                actionID is Displacement
-                && LevelChecked(Displacement)
-                && HasTarget()
-                && GetTargetDistance() >= 5 ? Corpsacorps : actionID;
-        }
-
-        internal class RDM_EmboldenManafication : CustomCombo
-        {
-            protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.RDM_EmboldenManafication;
-            protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level) =>
-                actionID is Embolden
-                && IsOnCooldown(Embolden)
-                && ActionReady(Manafication) ? Manafication : actionID;
-        }
-
-        internal class RDM_MagickBarrierAddle : CustomCombo
-        {
-            protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.RDM_MagickBarrierAddle;
-            protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level) =>
-                actionID is MagickBarrier
-                && (IsOnCooldown(MagickBarrier) || !LevelChecked(MagickBarrier))
-                && ActionReady(All.Addle)
-                && !TargetHasEffectAny(All.Debuffs.Addle) ? All.Addle : actionID;
         }
     }
 }

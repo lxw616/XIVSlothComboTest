@@ -32,6 +32,7 @@ namespace XIVSlothCombo.Combos.PvE
             Tetragrammaton = 3570,
             DivineBenison = 7432,
             Aquaveil = 25861,
+            Asylum = 3569,
             // DPS
             Glare1 = 16533,
             Glare3 = 25859,
@@ -89,96 +90,15 @@ namespace XIVSlothCombo.Combos.PvE
             internal static UserInt
                 WHM_STDPS_Lucid = new("WHMLucidDreamingFeature"),
                 WHM_STDPS_MainCombo_DoT = new("WHM_ST_MainCombo_DoT"),
-                WHM_AoEDPS_Lucid = new("WHM_AoE_Lucid"),
-                WHM_STHeals_Lucid = new("WHM_STHeals_Lucid"),
-                WHM_STHeals_ThinAir = new("WHM_STHeals_ThinAir"),
-                WHM_STHeals_Esuna = new("WHM_Cure2_Esuna"),
-                WHM_STHeals_BenedictionHP = new("WHM_STHeals_BenedictionHP"),
-                WHM_STHeals_TetraHP = new("WHM_STHeals_TetraHP"),
-                WHM_STHeals_BenisonHP = new("WHM_STHeals_BenisonHP"),
-                WHM_STHeals_AquaveilHP = new("WHM_STHeals_AquaveilHP"),
-                WHM_AoEHeals_Lucid = new("WHM_AoEHeals_Lucid"),
-                WHM_AoEHeals_ThinAir = new("WHM_AoE_ThinAir"),
-                WHM_AoEHeals_Cure3MP = new("WHM_AoE_Cure3MP");
+                WHM_STHeals_Esuna = new("WHM_Cure2_Esuna");
             internal static UserBool
                 WHM_ST_MainCombo_DoT_Adv = new("WHM_ST_MainCombo_DoT_Adv"),
                 WHM_ST_MainCombo_Adv = new("WHM_ST_MainCombo_Adv"),
-                WHM_ST_MainCombo_Opener_Swiftcast = new("WHM_ST_Opener_Swiftcast"),
-                WHM_STHeals_UIMouseOver = new("WHM_STHeals_UIMouseOver"),
-                WHM_STHeals_BenedictionWeave = new("WHM_STHeals_BenedictionWeave"),
-                WHM_STHeals_TetraWeave = new("WHM_STHeals_TetraWeave"),
-                WHM_STHeals_BenisonWeave = new("WHM_STHeals_BenisonWeave"),
-                WHM_STHeals_AquaveilWeave = new("WHM_STHeals_AquaveilWeave"),
-                WHM_AoEHeals_PlenaryWeave = new("WHM_AoEHeals_PlenaryWeave"),
-                WHM_AoEHeals_AssizeWeave = new("WHM_AoEHeals_AssizeWeave"),
-                WHM_AoEHeals_Medica2MO = new("WHM_AoEHeals_Medica2MO");
+                WHM_STHeals_UIMouseOver = new("WHM_STHeals_UIMouseOver");
             internal static UserFloat
-                WHM_ST_MainCombo_DoT_Threshold = new("WHM_ST_MainCombo_DoT_Threshold"),
-                WHM_STHeals_RegenTimer = new("WHM_STHeals_RegenTimer"),
-                WHM_AoEHeals_Medica2Time = new("WHM_AoEHeals_Medica2Time");
+                WHM_ST_MainCombo_DoT_Threshold = new("WHM_ST_MainCombo_DoT_Threshold");
             public static UserBoolArray
                 WHM_ST_MainCombo_Adv_Actions = new("WHM_ST_MainCombo_Adv_Actions");
-        }
-        
-        internal class WHM_SolaceMisery : CustomCombo
-        {
-            protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.WHM_SolaceMisery;
-
-            protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
-            {
-                byte BloodLilies = GetJobGauge<WHMGauge>().BloodLily;
-
-                return actionID is AfflatusSolace && BloodLilies == 3
-                    ? AfflatusMisery
-                    : actionID;
-            }
-        }
-
-        internal class WHM_RaptureMisery : CustomCombo
-        {
-            protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.WHM_RaptureMisery;
-
-            protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
-            {
-                byte BloodLilies = GetJobGauge<WHMGauge>().BloodLily;
-
-                return actionID is AfflatusRapture && BloodLilies == 3
-                    ? AfflatusMisery
-                    : actionID;
-            }
-        }
-
-        internal class WHM_CureSync : CustomCombo
-        {
-            protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.WHM_CureSync;
-
-            protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
-            {
-                return actionID is Cure2 && !LevelChecked(Cure2)
-                    ? Cure
-                    : actionID;
-            }
-        }
-
-
-        internal class WHM_Raise : CustomCombo
-        {
-            protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.WHM_Raise;
-
-            protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
-            {
-                if (actionID is All.Swiftcast)
-                {
-                    bool thinAirReady = !HasEffect(Buffs.ThinAir) && LevelChecked(ThinAir) && HasCharges(ThinAir);
-
-                    if (HasEffect(All.Buffs.Swiftcast))
-                        return IsEnabled(CustomComboPreset.WHM_ThinAirRaise) && thinAirReady
-                            ? ThinAir
-                            : Raise;
-                }
-
-                return actionID;
-            }
         }
 
         internal class WHM_ST_MainCombo : CustomCombo
@@ -203,58 +123,22 @@ namespace XIVSlothCombo.Combos.PvE
                 if (ActionFound)
                 {
                     WHMGauge? gauge = GetJobGauge<WHMGauge>();
-                    bool inOpener = IsEnabled(CustomComboPreset.WHM_ST_MainCombo_Opener) && Glare3Count < 4;
                     bool liliesFull = gauge.Lily == 3;
-                    bool liliesNearlyFull = gauge.Lily == 2 && gauge.LilyTimer >= 17000;
-
-                    if (inOpener)
-                    {
-                        if (Glare3Count == 0)
-                            return OriginalHook(Glare3);
-
-                        if (DiaCount == 0)
-                            return OriginalHook(Dia);
-
-                        if (Glare3Count == 3 && CanWeave(actionID))
-                        {
-                            if (ActionReady(All.Swiftcast) && Config.WHM_ST_MainCombo_Opener_Swiftcast)
-                                return OriginalHook(All.Swiftcast);
-
-                            if (ActionReady(PresenceOfMind))
-                            return PresenceOfMind;
-                        }
-
-                        if (Glare3Count == 4)
-                        {
-                            if (ActionReady(PresenceOfMind) && Config.WHM_ST_MainCombo_Opener_Swiftcast)
-                                return OriginalHook(PresenceOfMind);
-
-                            if (ActionReady(Assize))
-                            return Assize;
-                        }
-
-                        if (Glare3Count > 0)
-                            return OriginalHook(Glare3);
-                    }
+                    bool liliesNearlyFull = gauge.Lily == 2 && gauge.LilyTimer >= 15000;
+                    bool AllAttack = IsEnabled(CustomComboPreset.ALL_AllAttack);
 
                     if (CanSpellWeave(actionID))
                     {
-                        bool lucidReady = IsOffCooldown(All.LucidDreaming) && LevelChecked(All.LucidDreaming) && LocalPlayer.CurrentMp <= Config.WHM_STDPS_Lucid;
-                        bool pomReady = LevelChecked(PresenceOfMind) && IsOffCooldown(PresenceOfMind);
-                        bool assizeReady = LevelChecked(Assize) && IsOffCooldown(Assize);
-                        bool pomEnabled = IsEnabled(CustomComboPreset.WHM_ST_MainCombo_PresenceOfMind);
+                        bool lucidReady = ActionReady(All.LucidDreaming) && LocalPlayer.CurrentMp <= Config.WHM_STDPS_Lucid;
                         bool assizeEnabled = IsEnabled(CustomComboPreset.WHM_ST_MainCombo_Assize);
                         bool lucidEnabled = IsEnabled(CustomComboPreset.WHM_ST_MainCombo_Lucid);
 
-                        if (IsEnabled(CustomComboPreset.WHM_DPS_Variant_Rampart) &&
-                            IsEnabled(Variant.VariantRampart) &&
-                            IsOffCooldown(Variant.VariantRampart) &&
-                            CanSpellWeave(actionID))
+                        if (IsEnabled(CustomComboPreset.WHM_DPS_Variant_Rampart) && IsEnabled(Variant.VariantRampart) && IsOffCooldown(Variant.VariantRampart) && CanSpellWeave(actionID))
                             return Variant.VariantRampart;
 
-                        if (pomEnabled && pomReady)
+                        if (IsEnabled(CustomComboPreset.WHM_PresenceOfMind) && ActionReady(PresenceOfMind))
                             return PresenceOfMind;
-                        if (assizeEnabled && assizeReady)
+                        if (assizeEnabled && ActionReady(Assize))
                             return Assize;
                         if (lucidEnabled && lucidReady)
                             return All.LucidDreaming;
@@ -277,17 +161,22 @@ namespace XIVSlothCombo.Combos.PvE
 
                             // DoT Uptime & HP% threshold
                             float refreshtimer = Config.WHM_ST_MainCombo_DoT_Adv ? Config.WHM_ST_MainCombo_DoT_Threshold : 3;
-                            if ((dotDebuff is null || dotDebuff.RemainingTime <= refreshtimer) &&
-                                GetTargetHPPercent() > Config.WHM_STDPS_MainCombo_DoT)
+                            if (!AllAttack && (dotDebuff is null || dotDebuff.RemainingTime <= refreshtimer || (IsMoving && IsOffCooldown(Stone1) && dotDebuff.RemainingTime <= 8)) &&
+                                GetTargetHPPercent() > Config.WHM_STDPS_MainCombo_DoT && (level < 90 || EnemyHealthCurrentHp() >= 45000))
                                 return OriginalHook(Aero);
                         }
 
+                        if (IsEnabled(CustomComboPreset.WHM_ST_MainCombo_Misery) && LevelChecked(AfflatusMisery) && gauge.BloodLily >= 3)
+                        {
+                            if (liliesFull || liliesNearlyFull)
+                                return AfflatusMisery;
+                            if (GetCooldownRemainingTime(PresenceOfMind) >= 100)
+                                return AfflatusMisery;
+                        }
                         if (IsEnabled(CustomComboPreset.WHM_ST_MainCombo_LilyOvercap) && LevelChecked(AfflatusRapture) &&
                             (liliesFull || liliesNearlyFull))
                             return AfflatusRapture;
-                        if (IsEnabled(CustomComboPreset.WHM_ST_MainCombo_Misery_oGCD) && LevelChecked(AfflatusMisery) &&
-                            gauge.BloodLily >= 3)
-                            return AfflatusMisery;
+                        
 
                         return OriginalHook(Stone1);
                     }
@@ -305,97 +194,48 @@ namespace XIVSlothCombo.Combos.PvE
             {
                 if (actionID is Medica)
                 {
-                    WHMGauge? gauge = GetJobGauge<WHMGauge>();
-                    bool thinAirReady = LevelChecked(ThinAir) && !HasEffect(Buffs.ThinAir) && GetRemainingCharges(ThinAir) > Config.WHM_AoEHeals_ThinAir;
-                    var canWeave = CanSpellWeave(actionID, 0.3);
-                    bool lucidReady = ActionReady(All.LucidDreaming) && LocalPlayer.CurrentMp <= Config.WHM_AoEHeals_Lucid;
-                    bool plenaryReady = ActionReady(PlenaryIndulgence) && (!Config.WHM_AoEHeals_PlenaryWeave || (Config.WHM_AoEHeals_PlenaryWeave && canWeave));
-                    bool assizeReady = ActionReady(Assize) && (!Config.WHM_AoEHeals_AssizeWeave || (Config.WHM_AoEHeals_AssizeWeave && canWeave));
-                    var healTarget = GetHealTarget(Config.WHM_AoEHeals_Medica2MO);
-
-                    if (IsEnabled(CustomComboPreset.WHM_AoEHeals_Assize) && assizeReady)
-                        return Assize;
-
-                    if (IsEnabled(CustomComboPreset.WHM_AoEHeals_Plenary) && plenaryReady)
-                        return PlenaryIndulgence;
-
-                    if (IsEnabled(CustomComboPreset.WHM_AoEHeals_Lucid) && canWeave && lucidReady)
-                        return All.LucidDreaming;
-
-                    if (IsEnabled(CustomComboPreset.WHM_AoEHeals_Misery) && gauge.BloodLily == 3)
-                        return AfflatusMisery;
-
-                    if (IsEnabled(CustomComboPreset.WHM_AoEHeals_Rapture) && LevelChecked(AfflatusRapture) && gauge.Lily > 0)
-                        return AfflatusRapture;
-
-                    if (IsEnabled(CustomComboPreset.WHM_AoEHeals_ThinAir) && thinAirReady)
+                    if (ActionReady(ThinAir) && InCombat() && HasBattleTarget() && (!HasEffect(Buffs.ThinAir) || !WasLastAbility(ThinAir)))
                         return ThinAir;
-
-                    if (IsEnabled(CustomComboPreset.WHM_AoEHeals_Medica2) && (FindEffectOnMember(Buffs.Medica2, healTarget) == null || FindEffectOnMember(Buffs.Medica2, healTarget).RemainingTime <= Config.WHM_AoEHeals_Medica2Time) && ActionReady(Medica2))
-                        return Medica2;
-
-                    if (IsEnabled(CustomComboPreset.WHM_AoEHeals_Cure3) && ActionReady(Cure3) && (LocalPlayer.CurrentMp >= Config.WHM_AoEHeals_Cure3MP || HasEffect(Buffs.ThinAir)))
+                    if (LevelChecked(Medica2) && LocalPlayer.CurrentMp >= 1000)
+                    {
+                        if (!HasEffect(Buffs.Medica2))
+                            return Medica2;
+                        if (HasBattleTarget() && GetBuffRemainingTime(Buffs.Medica2) <= 3)
+                            return Medica2;
+                        if (!HasBattleTarget() && GetBuffRemainingTime(Buffs.Medica2) <= 7)
+                            return Medica2;
+                    }
+                    if (LevelChecked(Cure3) && LocalPlayer.CurrentMp >= 1500)
                         return Cure3;
-
                 }
-
                 return actionID;
             }
         }
 
         internal class WHM_ST_Heals : CustomCombo
         {
-            protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.WHM_STHeals;
+            protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.WHM_ST_Heals;
 
             protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
             {
                 if (actionID is Cure)
                 {
                     WHMGauge? gauge = GetJobGauge<WHMGauge>();
-                    GameObject? healTarget = GetHealTarget(Config.WHM_STHeals_UIMouseOver);
-                    bool canWeave = CanSpellWeave(actionID, 0.3);
-                    bool thinAirReady = LevelChecked(ThinAir) && !HasEffect(Buffs.ThinAir) && GetRemainingCharges(ThinAir) > Config.WHM_STHeals_ThinAir;
-                    bool lucidReady = ActionReady(All.LucidDreaming) && LocalPlayer.CurrentMp <= Config.WHM_STHeals_Lucid;
-                    bool tetraReady = ActionReady(Tetragrammaton) && (!Config.WHM_STHeals_TetraWeave || (Config.WHM_STHeals_TetraWeave && canWeave)) && GetTargetHPPercent(healTarget) <= Config.WHM_STHeals_TetraHP;
-                    bool benisonReady = ActionReady(DivineBenison) && (!Config.WHM_STHeals_BenisonWeave || (Config.WHM_STHeals_BenisonWeave && canWeave)) && GetTargetHPPercent(healTarget) <= Config.WHM_STHeals_BenisonHP;
-                    bool aquaReady = ActionReady(Aquaveil) && (!Config.WHM_STHeals_AquaveilWeave || (Config.WHM_STHeals_AquaveilWeave && canWeave)) && GetTargetHPPercent(healTarget) <= Config.WHM_STHeals_AquaveilHP;
-                    bool benedictionReady = ActionReady(Benediction) && (!Config.WHM_STHeals_BenedictionWeave || (Config.WHM_STHeals_BenedictionWeave && canWeave)) && GetTargetHPPercent(healTarget) <= Config.WHM_STHeals_BenedictionHP;
-                    bool regenReady = ActionReady(Regen) && (FindEffectOnMember(Buffs.Regen, healTarget) is null || FindEffectOnMember(Buffs.Regen, healTarget)?.RemainingTime <= Config.WHM_STHeals_RegenTimer);
 
-                    if (IsEnabled(CustomComboPreset.WHM_STHeals_Benediction) && benedictionReady)
-                        return Benediction;
-
-                    if (IsEnabled(CustomComboPreset.WHM_STHeals_Esuna) && ActionReady(All.Esuna) &&
-                        GetTargetHPPercent(healTarget) >= Config.WHM_STHeals_Esuna &&
-                        HasCleansableDebuff(healTarget))
-                        return All.Esuna;
-
-                    if (IsEnabled(CustomComboPreset.WHM_STHeals_Tetragrammaton) && tetraReady)
-                        return Tetragrammaton;
-
-                    if (IsEnabled(CustomComboPreset.WHM_STHeals_Lucid) && canWeave && lucidReady)
+                    if (ActionReady(All.LucidDreaming) && LocalPlayer.CurrentMp <= 2600)
                         return All.LucidDreaming;
 
-                    if (IsEnabled(CustomComboPreset.WHM_STHeals_Benison) && benisonReady && FindEffectOnMember(Buffs.DivineBenison, healTarget) is null)
-                        return DivineBenison;
-
-                    if (IsEnabled(CustomComboPreset.WHM_STHeals_Aquaveil) && aquaReady && FindEffectOnMember(Buffs.Aquaveil, healTarget) is null)
-                        return Aquaveil;
-
-                    if (IsEnabled(CustomComboPreset.WHM_STHeals_Regen) && regenReady)
-                        return Regen;
-
-                    if (IsEnabled(CustomComboPreset.WHM_STHeals_Solace) && gauge.Lily > 0 && ActionReady(AfflatusSolace))
-                        return AfflatusSolace;
-
-                    if (IsEnabled(CustomComboPreset.WHM_STHeals_ThinAir) && thinAirReady)
-                        return ThinAir;
-
-                    if (ActionReady(Cure2))
+                    if (LevelChecked(Cure2) && LocalPlayer.CurrentMp >= 1000 && !HasBattleTarget() && !IsMoving)
                         return Cure2;
-
+                    if (LevelChecked(AfflatusSolace) && gauge.Lily >= 2)
+                        return AfflatusSolace;
+                    if (ActionReady(Tetragrammaton) && gauge.Lily <= 1)
+                        return Tetragrammaton;
+                    if (LevelChecked(AfflatusSolace) && gauge.Lily >= 1)
+                        return AfflatusSolace;
+                    if (LevelChecked(Cure2) && LocalPlayer.CurrentMp >= 1000)
+                        return Cure2;
                 }
-
                 return actionID;
             }
         }
@@ -413,9 +253,6 @@ namespace XIVSlothCombo.Combos.PvE
                     bool liliesFullNoBlood = gauge.Lily == 3 && gauge.BloodLily < 3;
                     bool liliesNearlyFull = gauge.Lily == 2 && gauge.LilyTimer >= 17000;
 
-                    if (IsEnabled(CustomComboPreset.WHM_AoE_DPS_Assize) && ActionReady(Assize))
-                        return Assize;
-
                     if (IsEnabled(CustomComboPreset.WHM_DPS_Variant_Rampart) &&
                         IsEnabled(Variant.VariantRampart) &&
                         IsOffCooldown(Variant.VariantRampart))
@@ -428,15 +265,14 @@ namespace XIVSlothCombo.Combos.PvE
                         HasBattleTarget())
                         return Variant.VariantSpiritDart;
 
-                    if (CanSpellWeave(actionID) || IsMoving)
+                    if (InCombat())
                     {
-                        if (IsEnabled(CustomComboPreset.WHM_AoE_DPS_PresenceOfMind) && ActionReady(PresenceOfMind))
+                        if (IsEnabled(CustomComboPreset.WHM_AoE_DPS_Assize) && ActionReady(Assize))
+                            return Assize;
+                        if (IsEnabled(CustomComboPreset.WHM_PresenceOfMind) && ActionReady(PresenceOfMind))
                             return PresenceOfMind;
-                        if (IsEnabled(CustomComboPreset.WHM_AoE_DPS_Lucid) && ActionReady(All.LucidDreaming) &&
-                            LocalPlayer.CurrentMp <= Config.WHM_AoEDPS_Lucid)
-                            return All.LucidDreaming;
                     }
-
+                    
                     if (IsEnabled(CustomComboPreset.WHM_AoE_DPS_LilyOvercap) && LevelChecked(AfflatusRapture) &&
                         (liliesFullNoBlood || liliesNearlyFull))
                         return AfflatusRapture;
@@ -445,6 +281,45 @@ namespace XIVSlothCombo.Combos.PvE
                         return AfflatusMisery;
                 }
 
+                return actionID;
+            }
+        }
+
+        internal class WHM_Aquaveil : CustomCombo
+        {
+            protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.WHM_Aquaveil;
+
+            protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
+            {
+                if (actionID is Aquaveil)
+                {
+                    if (GetCooldownRemainingTime(Aquaveil) >= 59.2)
+                        return Aquaveil;
+                    if (ActionReady(DivineBenison) && !ActionReady(Aquaveil))
+                        return DivineBenison;
+                }
+                return actionID;
+            }
+        }
+
+        internal class WHM_AfflatusRapture : CustomCombo
+        {
+            protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.WHM_AfflatusRapture;
+
+            protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
+            {
+                if (actionID is AfflatusRapture)
+                {
+                    if (IsEnabled(CustomComboPreset.WHM_AfflatusRapture_Assize))
+                    {
+                        if (GetCooldownRemainingTime(Assize) >= 39)
+                            return Assize;
+                        if (ActionReady(Assize))
+                            return Assize;
+                    }
+                    if (ActionReady(PlenaryIndulgence))
+                        return PlenaryIndulgence;
+                }
                 return actionID;
             }
         }

@@ -205,6 +205,7 @@ namespace XIVSlothCombo
             ActionWatching.Dispose();
             Combos.JobHelpers.AST.Dispose();
             DisposeOpeners();
+            ECommonsMain.Dispose();
 
             Service.ClientState.Login -= PrintLoginMessage;
         }
@@ -262,7 +263,7 @@ namespace XIVSlothCombo
 
                 case "toggle": // toggle a feature
                     {
-                        if (!Service.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.InCombat])
+                        //if (!Service.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.InCombat])
                         {
                             string? targetPreset = argumentsParts[1].ToLowerInvariant();
                             foreach (CustomComboPreset preset in Enum.GetValues<CustomComboPreset>())
@@ -285,12 +286,12 @@ namespace XIVSlothCombo
 
                             Service.Configuration.Save();
                         }
-
+                        /*
                         else
                         {
                             Service.ChatGui.PrintError("Features cannot be toggled in combat.");
                         }
-
+                        */
                         break;
                     }
 

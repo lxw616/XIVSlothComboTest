@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using XIVSlothCombo.Combos.PvE;
 using XIVSlothCombo.CustomComboNS.Functions;
 using XIVSlothCombo.Extensions;
 using XIVSlothCombo.Services;
@@ -66,6 +67,9 @@ namespace XIVSlothCombo.Combos.JobHelpers
             {
                 if (Gauge.DrawnCard.Equals(CardType.NONE)) return false;
                 CardType cardDrawn = Gauge.DrawnCard;
+                bool MeleeCard = (cardDrawn is CardType.BALANCE or CardType.ARROW or CardType.SPEAR) ? true : false;
+                bool RangedCard = (cardDrawn is CardType.BOLE or CardType.EWER or CardType.SPIRE) ? true : false;
+
                 PartyTargets.Clear();
                 for (int i = 1; i <= 8; i++) //Checking all 8 available slots and skipping nulls & DCs
                 {
@@ -81,8 +85,8 @@ namespace XIVSlothCombo.Combos.JobHelpers
                     if (FindEffectOnMember(Buffs.SpireDamage, member) is not null) continue;
                     if (FindEffectOnMember(Buffs.SpearDamage, member) is not null) continue;
 
-                    if (Config.AST_QuickTarget_SkipDamageDown && TargetHasDamageDown(member)) continue;
-                    if (Config.AST_QuickTarget_SkipRezWeakness && TargetHasRezWeakness(member)) continue;
+                    if (TargetHasDamageDown(member)) continue;
+                    if (TargetHasRezWeakness(member)) continue;
 
                     PartyTargets.Add(member);
                 }
@@ -120,13 +124,78 @@ namespace XIVSlothCombo.Combos.JobHelpers
 
                 if (PartyTargets.Count > 0)
                 {
+                    if (IsEnabled(CustomComboPreset.AST_Cards_QuickTargetCards_BaseOnJob))
+                    {
+                        //限定DPS（队伍5～8号位）
+                        for (int i = PartyTargets.Count - 1; i >= 0; i--)
+                        {
+                            byte job = PartyTargets[i] is BattleChara ? (byte)(PartyTargets[i] as BattleChara).ClassJob.Id : (byte)0;
+
+                            if (MeleeCard)
+                            {
+                                //SAM
+                                if (job == 34)
+                                {
+                                    SelectedRandomMember = PartyTargets[i];
+                                    return true;
+                                }
+                                //NIN
+                                if (job == 30)
+                                {
+                                    SelectedRandomMember = PartyTargets[i];
+                                    return true;
+                                }
+                                //MNK
+                                if (job == 20)
+                                {
+                                    SelectedRandomMember = PartyTargets[i];
+                                    return true;
+                                }
+                                //DRK
+                                if (job == 32 && GetCooldownRemainingTime(Divination) >= 100)
+                                {
+                                    SelectedRandomMember = PartyTargets[i];
+                                    return true;
+                                }
+                            }
+                            if (RangedCard)
+                            {
+                                //BLU
+                                if (job == 36)
+                                {
+                                    SelectedRandomMember = PartyTargets[i];
+                                    return true;
+                                }
+                                //MCH
+                                if (job == 31)
+                                {
+                                    SelectedRandomMember = PartyTargets[i];
+                                    return true;
+                                }
+                                //BLM
+                                if (job == 25)
+                                {
+                                    SelectedRandomMember = PartyTargets[i];
+                                    return true;
+                                }
+                                //SMN
+                                if (job == 27)
+                                {
+                                    SelectedRandomMember = PartyTargets[i];
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+
+                    //原版发卡给随机DPS
                     PartyTargets.Shuffle();
                     //Give card to DPS first
                     for (int i = 0; i <= PartyTargets.Count - 1; i++)
                     {
                         byte job = PartyTargets[i] is BattleChara ? (byte)(PartyTargets[i] as BattleChara).ClassJob.Id : (byte)0;
-                        if (((cardDrawn is CardType.BALANCE or CardType.ARROW or CardType.SPEAR) && JobIDs.Melee.Contains(job)) ||
-                            ((cardDrawn is CardType.BOLE or CardType.EWER or CardType.SPIRE) && JobIDs.Ranged.Contains(job)))
+                        if ((MeleeCard && JobIDs.Melee.Contains(job)) ||
+                            (RangedCard && JobIDs.Ranged.Contains(job)))
                         {
                             //TargetObject(PartyTargets[i]);
                             SelectedRandomMember = PartyTargets[i];
@@ -139,8 +208,8 @@ namespace XIVSlothCombo.Combos.JobHelpers
                         for (int i = 0; i <= PartyTargets.Count - 1; i++)
                         {
                             byte job = PartyTargets[i] is BattleChara ? (byte)(PartyTargets[i] as BattleChara).ClassJob.Id : (byte)0;
-                            if ((cardDrawn is CardType.BALANCE or CardType.ARROW or CardType.SPEAR && JobIDs.Tank.Contains(job)) ||
-                                (cardDrawn is CardType.BOLE or CardType.EWER or CardType.SPIRE && JobIDs.Healer.Contains(job)))
+                            if ((MeleeCard && JobIDs.Tank.Contains(job)) ||
+                                (RangedCard && JobIDs.Healer.Contains(job)))
                             {
                                 //TargetObject(PartyTargets[i]);
                                 SelectedRandomMember = PartyTargets[i];
@@ -148,6 +217,10 @@ namespace XIVSlothCombo.Combos.JobHelpers
                             }
                         }
                     }
+
+                    //给自己发卡保底，防止不断循环让电脑变慢？
+                    SelectedRandomMember = GetPartySlot(1);
+                    return true;
                 }
                 return false;
             }

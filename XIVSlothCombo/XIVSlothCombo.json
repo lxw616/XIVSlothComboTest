@@ -1,11 +1,11 @@
 {
-  "Author": "Team Sloth",
-  "Name": "XIVSlothCombo",
-  "InternalName": "XIVSlothCombo",
+  "Author": "Team Sloth, sam",
+  "Name": "XIVSlothCombooo",
+  "InternalName": "XIVSlothCombooo",
   "DalamudApiLevel": 9,
   "Punchline": "Condenses combos and mutually exclusive abilities onto a single button - and then some.",
   "Description": "Condenses combos and mutually exclusive abilities onto a single button - and then some.",
-  "RepoUrl": "https://github.com/Nik-Potokar/XIVSlothCombo",
-  "IconUrl": "https://raw.githubusercontent.com/Nik-Potokar/XIVSlothCombo/main/res/plugin/xivslothcombo.png",
+  "RepoUrl": null, 
+  "IconUrl": null, 
   "Changelog": "Please check the project's GitHub or Discord for a full changelog."
 }

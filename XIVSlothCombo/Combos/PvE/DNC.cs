@@ -116,30 +116,6 @@ namespace XIVSlothCombo.Combos.PvE
                 DNCVariantCurePercent = "DNCVariantCurePercent";                            // Variant Cure     player HP% threshold
         }
 
-        internal class DNC_DanceComboReplacer : CustomCombo
-        {
-            protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.DNC_DanceComboReplacer;
-
-            protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
-            {
-                if (GetJobGauge<DNCGauge>().IsDancing)
-                {
-                    uint[]? actionIDs = Service.Configuration.DancerDanceCompatActionIDs;
-
-                    if (actionID == actionIDs[0] || (actionIDs[0] == 0 && actionID == Cascade))     // Cascade replacement
-                        return OriginalHook(Cascade);
-                    if (actionID == actionIDs[1] || (actionIDs[1] == 0 && actionID == Flourish))    // Fountain replacement
-                        return OriginalHook(Fountain);
-                    if (actionID == actionIDs[2] || (actionIDs[2] == 0 && actionID == FanDance1))   // Reverse Cascade replacement
-                        return OriginalHook(ReverseCascade);
-                    if (actionID == actionIDs[3] || (actionIDs[3] == 0 && actionID == FanDance2))   // Fountainfall replacement
-                        return OriginalHook(Fountainfall);
-                }
-
-                return actionID;
-            }
-        }
-
         internal class DNC_FanDanceCombos : CustomCombo
         {
             protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.DNC_FanDanceCombos;

@@ -237,6 +237,20 @@ namespace XIVSlothCombo.Combos.PvE
                             return OriginalHook(ThrowingDaggers);
                     }
 
+                    //Bozja
+                    if (InMeleeRange() && !inMudraState)
+                    {
+                        if (canWeave)
+                        {
+                            if (IsEnabled(CustomComboPreset.NIN_Bozja_LostRendArmor) && IsEnabled(Bozja.LostRendArmor) && IsOffCooldown(Bozja.LostRendArmor) &&
+                                !TargetHasEffectAny(Bozja.Debuffs.LostRendArmor) && EnemyHealthCurrentHp() > 17500 * 3 * 30)
+                                return Bozja.LostRendArmor;
+                        }
+                        if (IsEnabled(CustomComboPreset.NIN_Bozja_LostAssassination) && IsEnabled(Bozja.LostAssassination) && HasEffect(Bozja.Buffs.BeastEssence) &&
+                            !HasEffect(Bozja.Buffs.FontOfPower) && EnemyHealthCurrentHp() > 17500 * 3 * 18)
+                            return Bozja.LostAssassination;
+                    }
+
                     if (canWeave && !inMudraState)
                     {
                         if (IsEnabled(CustomComboPreset.NIN_Variant_Rampart) &&
@@ -486,6 +500,14 @@ namespace XIVSlothCombo.Combos.PvE
 
                     if (IsEnabled(CustomComboPreset.NIN_Variant_Cure) && IsEnabled(Variant.VariantCure) && PlayerHealthPercentageHp() <= GetOptionValue(Config.NIN_VariantCure))
                         return Variant.VariantCure;
+
+                    //Bozja
+                    if (InMeleeRange() && !inMudraState)
+                    {
+                        if (IsEnabled(CustomComboPreset.NIN_Bozja_LostAssassination) && IsEnabled(Bozja.LostAssassination) && HasEffect(Bozja.Buffs.BeastEssence) &&
+                            !HasEffect(Bozja.Buffs.FontOfPower) && EnemyHealthCurrentHp() > 17500 * 3 * 18)
+                            return Bozja.LostAssassination;
+                    }
 
                     if (canWeave && !inMudraState)
                     {

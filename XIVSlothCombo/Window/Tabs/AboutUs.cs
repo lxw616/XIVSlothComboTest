@@ -28,12 +28,12 @@ namespace XIVSlothCombo.Window.Tabs
 
             ImGui.BeginChild("About", new Vector2(0, 0), true);
 
-            ImGuiEx.ImGuiLineCentered("Header", delegate
+            ImGuiEx.LineCentered("Header", delegate
             {
                 ImGuiEx.TextUnderlined($"XIVSlothCombo - v{version}");
             });
 
-            ImGuiEx.ImGuiLineCentered("AboutHeader", delegate
+            ImGuiEx.LineCentered("AboutHeader", delegate
             {
                 ImGuiEx.Text($"With ");
                 ImGui.PushFont(UiBuilder.IconFont);
@@ -48,12 +48,12 @@ namespace XIVSlothCombo.Window.Tabs
 
             if (Images.Count == 12)
             {
-                ImGuiEx.ImGuiLineCentered("AboutImage", delegate
+                ImGuiEx.LineCentered("AboutImage", delegate
                 {
                     ImGui.Image(Images["teamsloth"].ImGuiHandle, new(310, 80));
 
                 });
-                ImGuiEx.ImGuiLineCentered("AboutTeamMembers", delegate
+                ImGuiEx.LineCentered("AboutTeamMembers", delegate
                 {
                     ImGui.Image(Images["aki"].ImGuiHandle, new(50, 50));
                     if (ImGui.IsItemHovered())
@@ -130,7 +130,7 @@ namespace XIVSlothCombo.Window.Tabs
 
                 ImGuiHelpers.ScaledDummy(5f);
 
-                ImGuiEx.ImGuiLineCentered("Others", delegate
+                ImGuiEx.LineCentered("Others", delegate
                 {
                     ImGuiEx.Text("Also with thanks to");
                     ImGui.SameLine();
@@ -152,14 +152,14 @@ namespace XIVSlothCombo.Window.Tabs
                 });
                 ImGuiHelpers.ScaledDummy(10f);
 
-                ImGuiEx.ImGuiLineCentered("DiscordButton", delegate
+                ImGuiEx.LineCentered("DiscordButton", delegate
                 {
                     if (IconButtons.IconImageButton(Images["discord"], "Click here to join our Discord Server!", new(0, 0), imageScale: 0.05f))
                     {
                         Util.OpenLink("https://discord.gg/xT7zyjzjtY");
                     }
                 });
-                ImGuiEx.ImGuiLineCentered("GitHubButton", delegate
+                ImGuiEx.LineCentered("GitHubButton", delegate
                 {
                     if (IconButtons.IconImageButton(Images["github"], "Got an issue? Click this button and report it!", new(0, 0), imageScale: 0.1f))
                     {
@@ -171,7 +171,7 @@ namespace XIVSlothCombo.Window.Tabs
             }
             else
             {
-                ImGuiEx.ImGuiLineCentered("Loading", delegate
+                ImGuiEx.LineCentered("Loading", delegate
                 {
                     ImGuiEx.Text("Loading...");
                 });

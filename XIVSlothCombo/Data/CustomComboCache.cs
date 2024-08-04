@@ -64,7 +64,7 @@ namespace XIVSlothCombo.Data
 
             foreach (DalamudStatus.Status? status in chara.StatusList)
             {
-                if (status.StatusId == statusID && (!sourceID.HasValue || status.SourceId == 0 || status.SourceId == InvalidObjectID || status.SourceId == sourceID))
+                if (status.StatusId == statusID) // && (sourceID == null || !sourceID.HasValue || status.SourceId == 0 || status.SourceId == InvalidObjectID || status.SourceId == sourceID))
                     return statusCache[key] = status;
             }
 

@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Authors>Team Sloth</Authors>
+		<Authors>Team Sloth, sam</Authors>
 		<Company>-</Company>
 		<Version>3.1.2.1</Version>
 		<!-- This is the version that will be used when pushing to the repo.-->
@@ -13,13 +13,13 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
-		<DalamudPluginPath>$(appdata)\XIVLauncher\installedPlugins\XIVSlothCombo\$(version)</DalamudPluginPath>
-		<DalamudDevPlugins>$(appdata)\XIVLauncher\devPlugins\XIVSlothCombo\</DalamudDevPlugins>
-		<AssemblyName>XIVSlothCombo</AssemblyName>
-		<RootNamespace>XIVSlothCombo</RootNamespace>
-		<PackageId>XIVSlothCombo</PackageId>
-		<Product>XIVSlothCombo</Product>
+		<DalamudLibPath>D:\FFXIV\Dalamud\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+		<DalamudPluginPath>D:\FFXIV\Dalamud\XIVLauncher\installedPlugins\XIVSlothCombooo\</DalamudPluginPath>
+		<DalamudDevPlugins>D:\FFXIV\Dalamud\XIVLauncher\devPlugin\XIVSlothCombooo\</DalamudDevPlugins>
+		<AssemblyName>XIVSlothCombooo</AssemblyName>
+		<RootNamespace>XIVSlothCombooo</RootNamespace>
+		<PackageId>XIVSlothCombooo</PackageId>
+		<Product>XIVSlothCombooo</Product>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
@@ -52,10 +52,11 @@
 		<DocumentationFile></DocumentationFile>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<LangVersion>preview</LangVersion>
+		<TargetFramework>net8.0-windows7.0</TargetFramework>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Content Include="..\res\plugin\xivslothcombo.png" Link="images\xivslothcombo.png" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+		<Content Include="..\res\plugin\XIVSlothCombooo.png" Link="images\XIVSlothCombooo.png" CopyToOutputDirectory="PreserveNewest" Visible="false" />
 	</ItemGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -63,16 +64,19 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
+	</ItemGroup>
+	
+	<ItemGroup>
 		<None Include="..\.editorconfig" Link=".editorconfig" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="DalamudPackager" Version="2.1.12" />
-		<PackageReference Include="ILRepack" Version="2.0.18" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
+		<PackageReference Include="ILRepack" Version="2.0.27">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 	</ItemGroup>
 
 	<ItemGroup>
